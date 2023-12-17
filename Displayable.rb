@@ -9,6 +9,7 @@ module Displayable
   end
 
   def announce_winner(player)
+    puts
     puts %(#{player.name} wins!)
   end
 
@@ -17,6 +18,7 @@ module Displayable
   end
 
   def alert_turn(player)
+    puts
     puts %(It's #{player.name}'s turn)
   end
 
@@ -26,7 +28,7 @@ module Displayable
   end
 
   def player_info(count)
-    puts %(Player #{count} name: (no numbers or special characters): )
+    puts %(Player #{count} name (no numbers or special characters): )
   end
 
   def game_header

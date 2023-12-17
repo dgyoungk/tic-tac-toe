@@ -33,4 +33,12 @@ module Displayable
     puts %(Let's play some tic tac toe!)
     puts
   end
+
+  def prompt_replay
+    puts %(\nDo you wanna play again? (Y/N))
+  end
+
+  def game_footer
+    puts %(\nThanks for playing!)
+  end
 end

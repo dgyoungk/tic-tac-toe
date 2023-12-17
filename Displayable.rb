@@ -9,11 +9,28 @@ module Displayable
   end
 
   def announce_winner(player)
+    puts %(#{player.name} wins!)
   end
 
   def declare_draw()
+    puts %(It's a draw, evenly matched!)
   end
 
   def alert_turn(player)
+    puts %(It's #{player.name}'s turn)
+  end
+
+  def explain_game()
+    puts %(Enter a number between 1-9 to choose your marker location:)
+    puts %(1-top-left corner, 9-bottom-right corner)
+  end
+
+  def player_info(count)
+    puts %(Player #{count} name: (no numbers or special characters): )
+  end
+
+  def game_header
+    puts %(Let's play some tic tac toe!)
+    puts
   end
 end

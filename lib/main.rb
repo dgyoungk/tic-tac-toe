@@ -1,9 +1,5 @@
-require './Game.rb'
-require './Board.rb'
-require './Displayable.rb'
+require './lib/game.rb'
+require './lib/board.rb'
+require './lib/displayable.rb'
 
-tic = Board.new
-
-tac = Game.new(tic)
-
-tac.start_game
+tac = Game.new

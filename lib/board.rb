@@ -3,9 +3,6 @@ class Board
 
   def initialize
     self.game_area = Array.new(8)
-    for i in 0..game_area.length
-      self.game_area[i] = " "
-    end
   end
 
   def update_board(player, position)
@@ -13,7 +10,7 @@ class Board
     player.update_positions(position - 1)
   end
 
-  def reset_board
+  def set_board
     for i in 0..game_area.length
       self.game_area[i] = ' '
     end

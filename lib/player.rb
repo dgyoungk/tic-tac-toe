@@ -3,10 +3,10 @@ class Player
 
   @@player_count = 0
 
-  def initialize(name)
+  def initialize(name, marked = [])
     self.name = name
     @@player_count += 1
-    self.marked = []
+    self.marked = marked
     designate_marker()
   end
 

@@ -8,14 +8,14 @@ class Game
 
   attr_accessor :board, :p1, :p2, :occupied, :turns, :over, :replay, :position
 
-  def initialize(board = Board.new, occupied = [], turns = 1, replay = true, over = false, p1 = nil, p2 = nil)
+  def initialize(board = Board.new, occupied = [], turns = 1)
     self.board = board
     self.occupied = occupied
     self.turns = turns
-    self.replay = replay
-    self.over = over
-    self.p1 = p1
-    self.p2 = p2
+    self.replay = true
+    self.over = false
+    self.p1 = nil
+    self.p2 = nil
     self.position = 0
   end
 
@@ -32,17 +32,14 @@ class Game
 
   def create_players
     player_info
-    new_player = get_player_id
-    # new_player = "D"
+    new_player = gets.chomp
     assign_player(new_player)
   end
 
-  def get_player_id
-    return gets.chomp
-  end
-
   def assign_player(player_id)
-    p1.nil? ? self.p1 = Player.new(player_id) : self.p2 = Player.new(player_id)
+    if p1.nil? || p2.nil?
+      p1.nil? ? self.p1 = Player.new(player_id) : self.p2 = Player.new(player_id)
+    end
   end
 
   def run_match
@@ -69,7 +66,7 @@ class Game
     get_position
     board.update_board(player, position - 1)
     self.occupied.push(position - 1)
-    game_over?()
+    game_over?
   end
 
   def get_position

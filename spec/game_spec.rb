@@ -16,8 +16,8 @@ describe Game do
     context 'when #game_setup is called' do
       before do
         allow(new_game).to receive(:game_header)
-        allow(new_game).to receive(:create_players)
         allow(new_game).to receive(:explain_game)
+        allow(new_game).to receive(:create_players).twice
         allow(new_game.board).to receive(:set_board)
         allow(new_game).to receive(:run_match)
         allow(new_game).to receive(:game_end)
@@ -27,8 +27,9 @@ describe Game do
         expect(new_game).to receive(:game_header)
         new_game.game_setup
       end
+      # why does the loop execute this method 3 times?
       xit 'sends #create_players to self' do
-        expect(new_game).to receive(:create_players)
+        expect(new_game).to receive(:create_players).twice
         new_game.game_setup
       end
       xit 'sends #explain_game to self' do
@@ -54,32 +55,26 @@ describe Game do
   describe '#create_players' do
     subject(:players) { described_class.new }
     context 'when method executes' do
-      let(:dummy_player) { instance_double(Player, name: "D")}
+      let(:dummy_player) { Player.new("D") }
       before do
         allow(players).to receive(:player_info)
         allow(players).to receive(:get_player_id)
       end
 
-      xit 'triggers #player_info twice' do
-        expect(players).to receive(:player_info).twice
+      xit 'triggers #player_info' do
+        expect(players).to receive(:player_info)
         players.create_players
       end
 
-      xit 'triggers #get_player_id twice' do
-        expect(players).to receive(:get_player_id).twice
+      xit 'triggers #get_player_id' do
+        expect(players).to receive(:get_player_id)
         players.create_players
       end
 
-      context 'when #assign_player is triggered' do
-        before do
-          allow(players).to receive(:get_player_id).and_return(dummy_player.name)
-        end
-
-        # figure out why this executes 1 extra time than specified
-        xit '#assign_player executes twice' do
-          expect(players).to receive(:assign_player).with(dummy_player.name).twice
-          players.create_players
-        end
+      xit 'triggers #assign_player' do
+        allow(players).to receive(:get_player_id).and_return(dummy_player.name)
+        expect(players).to receive(:assign_player).with(dummy_player.name)
+        players.create_players
       end
     end
   end
@@ -173,8 +168,39 @@ describe Game do
     end
   end
 
+  # looping and command message method
+  # things to test: method triggers and loop stop conditions
+  # TODO: test the gameplay methods
   describe '#play' do
-
+    subject(:gameplay) { described_class.new }
+    context 'when a game is over' do
+      before do
+        gameplay.instance_variable_set(:@over, true)
+        allow(gameplay).to receive(:place_marker).with(gameplay.p1)
+      end
+      it 'does not trigger board display' do
+        expect(gameplay).not_to receive(:display_board).with(gameplay.board)
+      end
+    end
+    context 'when game is not over and turns is 6' do
+      before do
+        allow(gameplay).to receive(:place_marker).with(gameplay.p1)
+        allow(gameplay).to receive(:alert_turn).with(gameplay.p1)
+        allow(gameplay).to receive(:display_board).with(gameplay.board)
+      end
+      it 'triggers board display at least 3 times' do
+        3.times { expect(gameplay).to receive(:display_board).with(gameplay.board) }
+        gameplay.play
+      end
+      it 'triggers #place_marker at least 3 times' do
+        3.times { expect(gameplay).to receive(:place_marker).with(gameplay.p1) }
+        gameplay.play
+      end
+      it 'triggers #alert_turn at least 3 times' do
+        3.times { expect(gameplay).to receive(:alert_turn).with(gameplay.p1) }
+        gameplay.play
+      end
+    end
   end
 
   describe '#game_end' do

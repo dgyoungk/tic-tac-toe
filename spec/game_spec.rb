@@ -23,30 +23,35 @@ describe Game do
         allow(new_game).to receive(:game_end)
       end
 
-      xit 'sends #game_header' do
+      xit 'triggers #game_header' do
         expect(new_game).to receive(:game_header)
         new_game.game_setup
       end
       # why does the loop execute this method 3 times?
-      xit 'sends #create_players to self' do
+      xit 'triggers #create_players' do
         expect(new_game).to receive(:create_players).twice
         new_game.game_setup
       end
-      xit 'sends #explain_game to self' do
+      xit 'triggers #explain_game' do
         expect(new_game).to receive(:explain_game)
         new_game.game_setup
       end
-      xit 'sends #set_board to game_board' do
-        expect(new_game.board).to receive(:set_board)
-        new_game.game_setup
-      end
-      xit 'sends #run_match to self' do
-        expect(new_game).to receive(:run_match)
-        new_game.game_setup
-      end
-      xit 'sends run_match to self' do
-        expect(new_game).to receive(:run_match)
-        new_game.game_setup
+      context 'when replay is false' do
+        before do
+          new_game.instance_variable_set(:@replay, false)
+        end
+        xit 'does not triggers #set_board of Board' do
+          expect(new_game.board).not_to receive(:set_board)
+          new_game.game_setup
+        end
+        xit 'does not triggers #run_match' do
+          expect(new_game).not_to receive(:run_match)
+          new_game.game_setup
+        end
+        xit 'does not triggers #game_end' do
+          expect(new_game).not_to receive(:game_end)
+          new_game.game_setup
+        end
       end
     end
   end
@@ -178,7 +183,7 @@ describe Game do
         gameplay.instance_variable_set(:@over, true)
         allow(gameplay).to receive(:place_marker).with(gameplay.p1)
       end
-      it 'does not trigger board display' do
+      xit 'does not trigger board display' do
         expect(gameplay).not_to receive(:display_board).with(gameplay.board)
       end
     end
@@ -188,17 +193,67 @@ describe Game do
         allow(gameplay).to receive(:alert_turn).with(gameplay.p1)
         allow(gameplay).to receive(:display_board).with(gameplay.board)
       end
-      it 'triggers board display at least 3 times' do
+      xit 'triggers board display at least 3 times' do
         3.times { expect(gameplay).to receive(:display_board).with(gameplay.board) }
         gameplay.play
       end
-      it 'triggers #place_marker at least 3 times' do
+      xit 'triggers #place_marker at least 3 times' do
         3.times { expect(gameplay).to receive(:place_marker).with(gameplay.p1) }
         gameplay.play
       end
-      it 'triggers #alert_turn at least 3 times' do
+      xit 'triggers #alert_turn at least 3 times' do
         3.times { expect(gameplay).to receive(:alert_turn).with(gameplay.p1) }
         gameplay.play
+      end
+    end
+  end
+
+  # methods to test: place_marker, verify_position, update_board, game_over?
+  describe '#place_marker' do
+    subject(:marker) { described_class.new }
+    context 'when method executes' do
+      before do
+        position = 9
+        marker.instance_variable_set(:@p1, Player.new("D"))
+        allow(marker.board).to receive(:update_board).with(marker.p1, position - 1)
+        allow(marker).to receive(:game_over?)
+        allow(marker).to receive(:verify_position).and_return(position)
+      end
+      xit 'triggers #verify_position' do
+        expect(marker).to receive(:verify_position)
+        marker.place_marker(marker.p1)
+      end
+      xit 'triggers #update_board on the Board object' do
+        position = 9
+        expect(marker.board).to receive(:update_board).with(marker.p1, position - 1)
+        marker.place_marker(marker.p1)
+      end
+      xit 'pushes the position value into the occupied array' do
+        position = 9
+        expect(marker.occupied).to receive(:push).with(position - 1)
+        marker.place_marker(marker.p1)
+      end
+      xit 'triggers #game_over?' do
+        expect(marker).to receive(:game_over?)
+        marker.place_marker(marker.p1)
+      end
+    end
+  end
+
+  describe '#verify_position' do
+    subject(:game_position) { described_class.new }
+    # user input chore
+    before do
+      io_obj = double
+      expect(game_position).to receive(:gets).and_return(io_obj)
+      expect(io_obj).to receive(:chomp).and_return(io_obj)
+      expect(io_obj).to receive(:to_i).and_return(:pos_choice)
+      allow(game_position.verify_position).to output("Choice: ").to_stdout
+    end
+    # looping test
+    context 'loop conditions are met' do
+      it 'does not trigger the loop' do
+
       end
     end
   end

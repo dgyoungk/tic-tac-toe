@@ -20,6 +20,14 @@ module Displayable
     puts %(\nIt's #{player.name}'s turn)
   end
 
+  def choice_msg
+    print %(Choice: )
+  end
+
+  def invalid_choice_msg()
+    puts %(Invalid option, please try again)
+  end
+
   def explain_game()
     puts %(\nEnter a number between 1-9 to choose your marker location:)
     puts %(1-top-left corner, 9-bottom-right corner)

@@ -6,7 +6,7 @@ class Game
 
   WIN_CONS = [(0..2).to_a, (3..5).to_a, (6..8).to_a, [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
 
-  attr_accessor :board, :p1, :p2, :occupied, :turns, :over, :replay
+  attr_accessor :board, :p1, :p2, :occupied, :turns, :over, :replay, :position
 
   def initialize(board = Board.new, occupied = [], turns = 1, replay = true, over = false, p1 = nil, p2 = nil)
     self.board = board
@@ -16,7 +16,7 @@ class Game
     self.over = over
     self.p1 = p1
     self.p2 = p2
-    @position = 0
+    self.position = 0
   end
 
   def game_setup
@@ -66,36 +66,44 @@ class Game
   # since the position is going to be an index in the board array, subtract 1 from position
   # to use it as the array index
   def place_marker(player)
-    @position = verify_position
-    board.update_board(player, @position - 1)
-    self.occupied.push(@position - 1)
+    get_position
+    board.update_board(player, position - 1)
+    self.occupied.push(position - 1)
     game_over?()
   end
 
-  def verify_position
-    print %(Choice: )
-    pos_choice = gets.chomp.to_i
-    until (pos_choice > 0 && pos_choice < 10) &&  !self.occupied.include?(pos_choice - 1)
-      puts "Invalid choice, try again"
-      print %(Choice: )
-      pos_choice = gets.chomp.to_i
+  def get_position
+    choice_msg
+    posit_choice = gets.to_i
+    until position_verified?(posit_choice)
+      invalid_choice_msg
+      choice_msg
+      posit_choice = gets.to_i
     end
-    pos_choice
+    self.position = posit_choice
   end
 
-  def verify_choice
+  def position_verified?(user_position)
+    return user_position > 0 && user_position < 10 && !occupied.include?(user_position - 1)
+  end
+
+  def get_player_choice
     choice = gets.chomp.downcase
-    until choice == 'y' || choice == 'n'
-      puts %(Invalid option, please try again)
+    until choice_verified?(choice)
+      invalid_choice_msg
       replay_msg
       choice = gets.chomp.downcase
     end
     choice
   end
 
+  def choice_verified?(decision)
+    return decision == 'y' || decision == 'n'
+  end
+
   def prompt_replay
     replay_msg
-    decision = verify_choice
+    decision = get_player_choice
     self.replay = false if decision == 'n'
   end
 

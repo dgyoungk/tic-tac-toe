@@ -16,15 +16,18 @@ class Game
     self.over = over
     self.p1 = p1
     self.p2 = p2
+    @position = 0
   end
 
   def game_setup
     game_header()
     2.times { create_players }
     explain_game
-    board.set_board
-    run_match
-    game_end
+    while replay
+      board.set_board
+      run_match
+      game_end
+    end
   end
 
   def create_players
@@ -63,21 +66,21 @@ class Game
   # since the position is going to be an index in the board array, subtract 1 from position
   # to use it as the array index
   def place_marker(player)
-    position = verify_position
-    board.update_board(player, position - 1)
-    self.occupied << position - 1
+    @position = verify_position
+    board.update_board(player, @position - 1)
+    self.occupied.push(@position - 1)
     game_over?()
   end
 
   def verify_position
     print %(Choice: )
-    position = gets.chomp.to_i
-    until (position > 0 && position < 10) && (self.occupied.empty? || !self.occupied.include?(position - 1))
+    pos_choice = gets.chomp.to_i
+    until (pos_choice > 0 && pos_choice < 10) &&  !self.occupied.include?(pos_choice - 1)
       puts "Invalid choice, try again"
       print %(Choice: )
-      position = gets.chomp.to_i
+      pos_choice = gets.chomp.to_i
     end
-    position
+    pos_choice
   end
 
   def verify_choice
@@ -124,7 +127,7 @@ class Game
     self.p1.marked = []
     self.p2.marked = []
     self.occupied = []
-    self.stop = false
+    self.replay = true
     self.over = false
     self.turns = 1
     self.board.set_board

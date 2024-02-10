@@ -15,7 +15,7 @@ class Player
   end
 
   def update_positions(position)
-    self.marked << position
+    self.marked.push(position)
   end
 
   private

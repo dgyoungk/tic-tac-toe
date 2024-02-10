@@ -6,7 +6,7 @@ class Board
   end
 
   def update_board(player, position)
-    self.game_area.insert(position, player.marker)
+    self.game_area[position] = player.marker
     player.update_positions(position)
   end
 

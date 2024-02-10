@@ -105,18 +105,6 @@ describe Game do
     end
   end
 
-  describe '#explain_game' do
-    subject(:game_msgs) { described_class.new }
-    context 'when method executes' do
-      xit 'outputs the appropriate message to console' do
-        msg1 = %(\nEnter a number between 1-9 to choose your marker location:)
-        msg2 = %(1-top-left corner, 9-bottom-right corner)
-        expect(game_msgs).to receive(:puts).and_return(msg1, msg2)
-        game_msgs.explain_game
-      end
-    end
-  end
-
   describe '#run_match' do
     subject(:game_match) { described_class.new }
     context 'when method executes' do
@@ -208,19 +196,20 @@ describe Game do
     end
   end
 
-  # methods to test: place_marker, verify_position, update_board, game_over?
+  # methods to test: game_over?
   describe '#place_marker' do
     subject(:marker) { described_class.new }
     context 'when method executes' do
       before do
         position = 9
+        marker.instance_variable_set(:@position, 9)
         marker.instance_variable_set(:@p1, Player.new("D"))
         allow(marker.board).to receive(:update_board).with(marker.p1, position - 1)
         allow(marker).to receive(:game_over?)
-        allow(marker).to receive(:verify_position).and_return(position)
+        allow(marker).to receive(:get_position)
       end
-      xit 'triggers #verify_position' do
-        expect(marker).to receive(:verify_position)
+      xit 'triggers #get_position' do
+        expect(marker).to receive(:get_position)
         marker.place_marker(marker.p1)
       end
       xit 'triggers #update_board on the Board object' do
@@ -240,20 +229,119 @@ describe Game do
     end
   end
 
-  describe '#verify_position' do
-    subject(:game_position) { described_class.new }
-    # user input chore
+  describe '#get_position' do
+    subject(:to_verify) { described_class.new }
+    let(:valid_choice) { double("valid_choice", value: 8) }
+    let(:invalid_choice) { double("invalid choice", value: 12) }
     before do
-      io_obj = double
-      expect(game_position).to receive(:gets).and_return(io_obj)
-      expect(io_obj).to receive(:chomp).and_return(io_obj)
-      expect(io_obj).to receive(:to_i).and_return(:pos_choice)
-      allow(game_position.verify_position).to output("Choice: ").to_stdout
+      allow(to_verify).to receive(:choice_msg)
+      allow(to_verify).to receive(:invalid_choice_msg)
     end
-    # looping test
-    context 'loop conditions are met' do
-      it 'does not trigger the loop' do
+    context 'when input is valid' do
+      before do
+        allow(to_verify).to receive(:gets).and_return(valid_choice.value)
+      end
+      it 'sets the @position value' do
+        expect { to_verify.get_position }.to change { to_verify.position }.to(valid_choice.value)
+      end
+      it '#position_verified? returns true' do
+        expect(to_verify).to receive(:position_verified?).with(valid_choice.value).and_return(true)
+        to_verify.position_verified?(valid_choice.value)
+      end
+    end
 
+    context 'when input is invalid' do
+      before do
+        allow(to_verify).to receive(:gets).and_return(invalid_choice.value, valid_choice.value)
+      end
+      it "#invalid_choice_msg should trigger once" do
+        expect(to_verify).to receive(:invalid_choice_msg).once
+        to_verify.get_position
+      end
+    end
+
+    context 'when input is invalid 3 times' do
+      before do
+        foo = 'bar'
+        bar = 'foo'
+        allow(to_verify).to receive(:gets).and_return(invalid_choice.value, foo, bar, valid_choice.value)
+      end
+      it '#invalid_choice_msg should trigger 3 times' do
+        3.times { expect(to_verify).to receive(:invalid_choice_msg) }
+        to_verify.get_position
+      end
+    end
+  end
+
+  # methods to test: check_win_con, change in observable state
+  describe '#game_over?' do
+
+  end
+
+  describe '#prompt_replay' do
+    subject(:prompt) { described_class.new }
+    before do
+      allow(prompt).to receive(:replay_msg)
+    end
+    context "when user's choice is 'n'" do
+      let(:no_replay) { double('no_replay', value: 'n') }
+      before do
+        allow(prompt).to receive(:get_player_choice).and_return(no_replay.value)
+      end
+      it 'replay should be set to false' do
+        expect { prompt.prompt_replay }.to change { prompt.replay }.to false
+      end
+    end
+    context "when user's choice is 'y'" do
+      let(:yes_replay) { double('yes_replay', value: 'y') }
+      before do
+        allow(prompt).to receive(:get_player_choice).and_return(yes_replay.value)
+      end
+      it 'replay should not change value' do
+        expect { prompt.prompt_replay }.not_to change { prompt.replay }
+      end
+    end
+  end
+
+  describe '#get_player_choice' do
+    subject(:replay_choice) { described_class.new }
+    let(:valid_choice) { double('valid_choice', value: 'y') }
+    let(:invalid_choice) { double('invalid_choice', value: 'nono') }
+    before do
+      allow(replay_choice).to receive(:replay_msg)
+    end
+    context 'when input is valid' do
+      before do
+        allow(replay_choice).to receive(:gets).and_return(valid_choice.value)
+      end
+      it 'returns the input' do
+        result = replay_choice.get_player_choice
+        expect(result).to eq(valid_choice.value)
+      end
+      it '#choice_verified? should return true' do
+        expect(replay_choice).to receive(:choice_verified?).with(valid_choice.value).and_return(true)
+        replay_choice.get_player_choice
+      end
+    end
+    context 'when input is invalid once' do
+      before do
+        allow(replay_choice).to receive(:gets).and_return(invalid_choice.value, valid_choice.value)
+      end
+      it 'should display invalid_choice_msg once' do
+        expect(replay_choice).to receive(:invalid_choice_msg).once
+        replay_choice.get_player_choice
+      end
+    end
+    context 'when input value is invalid 4 times' do
+      before do
+        foo = 'bar'
+        bar = 'foo'
+        gaga = 'gaga'
+        allow(replay_choice).to receive(:gets).and_return(invalid_choice.value, foo, bar, gaga, valid_choice.value)
+      end
+      it 'should display invalid_choice_msg 4 times' do
+        4.times { expect(replay_choice).to receive(:invalid_choice_msg) }
+        replay_choice.get_player_choice
       end
     end
   end

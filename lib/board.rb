@@ -1,18 +1,16 @@
 class Board
   attr_accessor :game_area
 
-  def initialize
-    self.game_area = Array.new(8)
+  def initialize(game_area = Array.new(8))
+    self.game_area = game_area
   end
 
   def update_board(player, position)
-    self.game_area[position - 1] = player.marker
-    player.update_positions(position - 1)
+    self.game_area.insert(position, player.marker)
+    player.update_positions(position)
   end
 
   def set_board
-    for i in 0..game_area.length
-      self.game_area[i] = ' '
-    end
+    game_area.length.times { |n| game_area[n] = ' ' }
   end
 end

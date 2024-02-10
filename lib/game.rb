@@ -8,49 +8,65 @@ class Game
 
   attr_accessor :board, :p1, :p2, :occupied, :turns, :over, :replay
 
-  def initialize(board = Board.new, occupied = [], turns = 1, replay = true, over = false)
+  def initialize(board = Board.new, occupied = [], turns = 1, replay = true, over = false, p1 = nil, p2 = nil)
     self.board = board
     self.occupied = occupied
     self.turns = turns
     self.replay = replay
     self.over = over
-    game_setup()
+    self.p1 = p1
+    self.p2 = p2
   end
 
   def game_setup
     game_header()
-    until self.p1 && self.p2
-      player_info
-      create_player
-    end
+    2.times { create_players }
     explain_game
     board.set_board
     run_match
     game_end
   end
 
-  def create_player
-    p1.nil? ? self.p1 = Player.new(gets.chomp) : self.p2 = Player.new(gets.chomp)
+  def create_players
+    player_info
+    new_player = get_player_id
+    # new_player = "D"
+    assign_player(new_player)
+  end
+
+  def get_player_id
+    return gets.chomp
+  end
+
+  def assign_player(player_id)
+    p1.nil? ? self.p1 = Player.new(player_id) : self.p2 = Player.new(player_id)
   end
 
   def run_match
     turns.even? ? alert_turn(p2) : alert_turn(p1)
-    until self.over || turns > 9
-      display_board(board)
-      play
-    end
+    play
     display_board(board)
     prompt_replay
   end
 
   def play
-    if turns.even?
-      place_marker(self.p2)
-      alert_turn(self.p1) unless self.over
-    else
-      place_marker(self.p1)
-      alert_turn(self.p2) unless self.over
+    until self.over || turns > 9
+      display_board(board)
+      turns.even? ? place_marker(p2) : place_marker(p1)
+      unless over
+        turns.even? ? alert_turn(p1) : alert_turn(p2)
+      end
+      update_turns()
     end
+  end
+
+  # since the position is going to be an index in the board array, subtract 1 from position
+  # to use it as the array index
+  def place_marker(player)
+    position = verify_position
+    board.update_board(player, position - 1)
+    self.occupied << position - 1
+    game_over?()
   end
 
   def verify_position
@@ -82,15 +98,6 @@ class Game
 
   def game_end
     replay ? reset_game : game_footer
-  end
-
-  # checks whether a board position is already occupied before placing marker
-  def place_marker(player)
-    position = verify_position
-    board.update_board(player, position)
-    update_turns()
-    self.occupied << position - 1
-    game_over?()
   end
 
   def check_win_con(player)
@@ -128,6 +135,4 @@ class Game
   def update_turns
     @turns += 1
   end
-
-  attr_reader :turns
 end

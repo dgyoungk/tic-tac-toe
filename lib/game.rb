@@ -1,5 +1,6 @@
 require './lib/displayable.rb'
 require './lib/player.rb'
+require './lib/board.rb'
 
 class Game
   include Displayable

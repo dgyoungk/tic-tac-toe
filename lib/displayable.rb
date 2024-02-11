@@ -13,7 +13,7 @@ module Displayable
   end
 
   def declare_draw()
-    puts %(It's a draw, evenly matched!)
+    puts %(\nIt's a draw, evenly matched!)
   end
 
   def alert_turn(player)
